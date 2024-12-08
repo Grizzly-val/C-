@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
+#include <cctype>
 #include <fstream>
+#include <limits>
 
 using namespace std;
 
@@ -17,13 +19,13 @@ double addItemPrice[];
 */
 
 
-const int maxacc = 3;
+const int maxacc = 100;
 string AccountName[maxacc];
 string AccountPass[maxacc];
 double AccountBal[maxacc];
 double UserBalance;
-char name[16];
-char password[8];
+string name;
+string password;
 double balance = 0;
 
 void play(int user){
@@ -37,9 +39,9 @@ void play(int user){
         cin >> selectPC;
         switch(selectPC.at(0)){
         case 'a':
-            cout << "For how long will you be playing (minutes)? ";
+            cout << "For how long will you be playing, " << AccountName[user] << " (minutes)? " << endl;
             cin >> howLong;
-            playPrice = (howLong / 60) * 50;
+            playPrice = (howLong / 60) * 50;    //calculates the total cost based on duration in minutes entered. 50php per hour
             if(AccountBal[user] - playPrice >= 0){
                 cout << "Payment has been deducted from your Account Balance.\n";
                 AccountBal[user] -= playPrice;
@@ -53,14 +55,14 @@ void play(int user){
             break;
 
             case 'b':
-                cout << "For how long will you be playing sir(minutes)? ";
+                cout << "For how long will you be playing, " << AccountName[user] << " (minutes)? " << endl;
                 cin >> howLong;
                 playPrice = (howLong / 60) * 70;
             if(AccountBal[user] - playPrice >= 0){
                 cout << "Payment has been deducted from your Account Balance.\n";
                 AccountBal[user] -= playPrice;
                 cout << "Current Balance: " << AccountBal[user] << endl;
-                cout << "Thank you so much for playing. Good luck with your games, Player! \n";
+                cout << "Thank you so much for playing. Good luck with your games, Player! \n\n";
             }
             else{
                 cout << "\nPayment failure.\nSending you back to your Account Menu...\n\n";
@@ -74,22 +76,17 @@ void play(int user){
 }
 
 void buy(int user, double total, string cart[]){
-    if(cart[0] == "\0"){
-        cout << "Your cart is empty. \nSending you back to Account Menu...\n";
-        total = 0;
-    };
-
     string confirmPurchase;
-    cout << "The total of your order is " << total << ", do you want to confirm purchase? [y/n]: ";
+    cout << "The total of your cart is " << total << ", do you want to confirm purchase? [y/n]: ";
     cin >> confirmPurchase;
     if(confirmPurchase.at(0) == 'y'){
         if(AccountBal[user] - total >= 0){
             AccountBal[user] -= total;
             cout << "Payment Received! Thank you for your purchase! \nCurrent Balance: " << AccountBal[user] << endl;
             for(int i = 0; i < 50; i++){
-            cart[i] = "\0";
+            cart[i] = "\0"; //empties the cart
             }
-            total = 0;
+            total = 0; //resets the total price
         }
         else{
             cout << "\n!!Payment failure!!\nSending you back to Account Menu...\n\n";
@@ -118,14 +115,21 @@ void store(int user){
             for(int i = 0; i < 50; i++){
                 cart[i] = "\0";
                 }
-                total = 0;
+                total = 0;  //total always resets to zero each time the user exits the loop
                 break;
         case '0':
+            if(cart[0] == "\0"){ //if the first index of the array is empty, that means that the array is empty (cart is empty)
+                cout << "\nYour cart is empty. \nSending you back to Account Menu...\n";
+                total = 0;
+                break;
+                }
+            else{
             buy(user, total, cart);
             break;
+            }
         case '1':
         for(int i = 0; i < 50; i++){
-            if(cart[i] == "\0"){
+            if(cart[i] == "\0"){        //item stored to the first empty indext found in the array.
                 cart[i] = "Noodles";
             }}
             total += 25;
@@ -207,9 +211,16 @@ void InAccount(int user){
                 cout << "=========================================\n\n";
                 break;
             case 'b':
-                cout << "How much would you like to add? \nEnter Amount in php: " << endl; 
+                cout << "How much would you like to add? \nEnter Amount in php: ";
                 cin >> UserBalance;
-                AccountBal[user] += UserBalance;
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid input.\n";
+                } else {
+                    AccountBal[user] += UserBalance;
+                    cout << "Successfully Added!\n";
+                }
                 break;
             case 'c':
                 play(user);
@@ -232,7 +243,7 @@ void login(int i){
         if(password == AccountPass[i]){
             cout << endl;
             cout << "Login Successful\n\n";
-            InAccount(i);
+            InAccount(i);   //if password correct, call the InAccount function and pass i, which is the index for you account. ex. name[i], password[i], and balance[i]
 
             } else{
                 cout << endl;
@@ -247,36 +258,36 @@ void CreateAcc(){
     cin >> name;
     cout << "Create Password: ";
     cin >> password;
-    for(int i = 0; i < maxacc; i++){
-        if(name == AccountName[i]){
+    for(int i = 0; i < maxacc; i++){ //for-loop to go through all of the index in the name array variable
+        if(name == AccountName[i]){     //if name matched with existing name in the array, go back to main menu.
             cout << "Account name already exists.\n\n";
             break;
-        }
-        if(AccountName[i] == "\0"){
-            AccountName[i] = name;
+        };
+        if(AccountName[i] == "\0"){     //if an empty index is found, store name, password, and balance in their respective array variable then stop loop.
+            AccountName[i] = name;      //Different arrays but stores name, password, and balance to the SAME index.
             AccountPass[i] = password;
             AccountBal[i] = balance;
             break;
-        }
+        };
     }
 }
 
-void SearchAcc(string Sname){
-    string nTemp;
-    cout << "\n[Results Found]\n" << "_______________________\n";
-    for(int i = 0; i <= maxacc; i++){
+void SearchAcc(string Sname){ //function receives the input of the user which is the name the user is searching for
+    string nTemp;                   //nTemp is a temporary variable that will store the name that matched
+    cout << "\n[Result]\n" << "_______________________\n";
+    for(int i = 0; i < maxacc; i++){
         if(Sname == AccountName[i]){
-            cout << i + 1 << ". " << AccountName[i] << endl;
+            cout << "Found: " << AccountName[i] << endl;
             nTemp = AccountName[i];
         }
-        }
+        }; //independent if statement
         cout << "_______________________\n\n";
-        if(Sname == nTemp){
-        cout << "Would you like to Login? (y/n): ";
+        if(Sname == nTemp){         //if name searched is the same as the name that was stored temporarily, proceed to login.
+        cout << "Would you like to Login? (y/n): "; //the purpose of nTemp is to check if there are results found. If none, go back to main menu.
         string YoN;
             do{
             cin >> YoN;
-            for(int j = 0; j < maxacc; j++){
+            for(int j = 0; j < maxacc; j++){    //another for loop to check which index the name that matched with Sname is in
                 if(Sname == AccountName[j]){
                     if(YoN.at(0) == 'y'){
                         cout << "Accessing " << AccountName[j] << "..." << endl << endl;
@@ -298,7 +309,7 @@ void DeleteAcc(int acc){
 
     cout << "Enter password: ";
     cin >> password;
-    if(password == AccountPass[acc]){
+    if(password == AccountPass[acc]){ //prompt for password and if password is correct, proceed to confirmation/authentication
         do{
         cout << "\nAre you sure you want to delete " << AccountName[acc] << "?\nAccount Balance: " << AccountBal[acc] << "\ny/n? " << endl;
         cin >> auth;
@@ -320,7 +331,8 @@ void DeleteAcc(int acc){
 }
 
 int main(){
-    string option;
+    int Dcounter = 1; //variable for the account number for display and search accounts
+    string option;  //variable option is a string and the program only takes the 0 index of that string because char variable goes through each of the characters entered
     cout << "Welcome to Trixter's Gaming iCafe! \n" << "How may GrizzlyBOT help you? " << endl;
     do{
     cout << "[1] Search an Account" << endl;
@@ -333,7 +345,7 @@ int main(){
         case '1':
             cout << "Account Name: ";
             cin >> name;
-            SearchAcc(name);
+            SearchAcc(name); //prompt for name and call the function to search while passing the input of the user to the function
             break;
         case '2':
             CreateAcc();
@@ -351,15 +363,17 @@ int main(){
             cout << "|No.|    |Name|\n";
             for(int i = 0; i < maxacc; i++){
                 if(AccountName[i] != "\0"){
-                    cout << i + 1 << ".         " << AccountName[i] << endl;
+                    cout << Dcounter << ".         " << AccountName[i] << endl;
+                    Dcounter++;
                 }
             }
+            Dcounter = 1; //Dcounter resets
             break;
         case '5':
             break;
         default:
             break;
-    }}while(option.at(0) != '5');
+    }}while(option.at(0) != '5');   //"input.at(0)" or reading the string input's first character. I did this for all of inputs to ensure only one character is read.
 
     cout << "Bye!";
 

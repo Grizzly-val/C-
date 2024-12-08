@@ -1,7 +1,5 @@
 #include <iostream>
 #include <string>
-#include <cctype>
-#include <fstream>
 #include <limits>
 
 using namespace std;
@@ -36,41 +34,66 @@ void play(int user){
         cout << "Thank you for gaming @ Trixter's iCafe! \n==Offers== \n";
         do{
         cout << "[a]-|Regular| 50php for 1 Hour \n[b]-|VIP| 70php for 1 Hour \nWhere would you like to play?: ";
-        cin >> selectPC;
+        getline(cin, selectPC);
+        while(selectPC.empty()) {
+            cout << "Input empty\n";
+            cout << "Where would you like to play?: ";
+            getline(cin, selectPC);
+        }
         switch(selectPC.at(0)){
         case 'a':
             cout << "For how long will you be playing, " << AccountName[user] << " (minutes)? " << endl;
             cin >> howLong;
-            playPrice = (howLong / 60) * 50;    //calculates the total cost based on duration in minutes entered. 50php per hour
-            if(AccountBal[user] - playPrice >= 0){
+            if(cin.fail()){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "\nInvalid input.\n";
+            }
+            else{
+                playPrice = (howLong / 60) * 50;    //calculates the total cost based on duration in minutes entered. 50php per hour
+            };
+
+            if(AccountBal[user] - playPrice >= 0 && playPrice > 0){
                 cout << "Payment has been deducted from your Account Balance.\n";
                 AccountBal[user] -= playPrice;
                 cout << "Current Balance: " << AccountBal[user] << endl;
                 cout << "Thank you for playing. Good luck Player! \n";
             }
             else{
-                cout << "Payment failure.\nSending you back to your Account Menu...\n\n";
+                cout << "\nPayment failure.\nSending you back to your Account Menu...\nEnter any key\n";
                 }
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // This clears the leftover input
             playPrice = 0;
             break;
 
-            case 'b':
-                cout << "For how long will you be playing, " << AccountName[user] << " (minutes)? " << endl;
-                cin >> howLong;
-                playPrice = (howLong / 60) * 70;
-            if(AccountBal[user] - playPrice >= 0){
+        case 'b':
+            cout << "For how long will you be playing, " << AccountName[user] << " (minutes)? " << endl;
+            cin >> howLong;
+            if(cin.fail()){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "\nInvalid input.\n";
+            }
+            else{
+                playPrice = (howLong / 60) * 70;    //calculates the total cost based on duration in minutes entered. 50php per hour
+            };
+
+            if(AccountBal[user] - playPrice >= 0 && playPrice > 0){
                 cout << "Payment has been deducted from your Account Balance.\n";
                 AccountBal[user] -= playPrice;
                 cout << "Current Balance: " << AccountBal[user] << endl;
-                cout << "Thank you so much for playing. Good luck with your games, Player! \n\n";
+                cout << "Thank you for playing. Good luck Player! \n";
             }
             else{
-                cout << "\nPayment failure.\nSending you back to your Account Menu...\n\n";
-            }
+                cout << "\nPayment failure.\nSending you back to your Account Menu...\nEnter any key\n";
+                }
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // This clears the leftover input
             playPrice = 0;
             break;
-            default:
+
+        default:
             break;
+
             }}while(selectPC.at(0) != 'a' && selectPC.at(0) != 'b');
 
 }
@@ -78,7 +101,12 @@ void play(int user){
 void buy(int user, double total, string cart[]){
     string confirmPurchase;
     cout << "The total of your cart is " << total << ", do you want to confirm purchase? [y/n]: ";
-    cin >> confirmPurchase;
+    getline(cin, confirmPurchase);
+    while(confirmPurchase.empty()) {
+        cout << "Input empty\n";
+        cout << "The total of your cart is " << total << ", do you want to confirm purchase? [y/n]: ";
+        getline(cin, confirmPurchase);
+    }
     if(confirmPurchase.at(0) == 'y'){
         if(AccountBal[user] - total >= 0){
             AccountBal[user] -= total;
@@ -108,7 +136,11 @@ void store(int user){
     cout << "[x] Empty cart \n[0] Check-out \n";
     cout << "Add any of the following to your cart! \n";
     do{
-    cin >> itemSelect;
+    getline(cin, itemSelect);
+    while(itemSelect.empty()) {
+        cout << "Input empty\n";
+        getline(cin, itemSelect);
+    }
     switch(itemSelect.at(0)){
         case 'x':
             cout << "Emptying cart... Sending you back to Account Menu...\n";
@@ -198,48 +230,72 @@ void store(int user){
 }while(itemSelect.at(0) != 'x' && itemSelect.at(0) != '0');
 }
 
-void InAccount(int user){
+void InAccount(int user) {
+    double UserBalance;
     string select;
     cout << "Hello there, " << AccountName[user] << "!" << endl;
-    do{
-    cout << "[a] Check balance  [b] Add balance\n[c] Play           [d] Buy\n[e] Logout" << endl;
-    cin >> select;
-        switch(select.at(0)){
+    do {
+        cout << "[a] Check balance   [b] Add balance\n";
+        cout << "[c] Play            [d] Buy\n";
+        cout << "[e] Logout" << endl;
+        getline(cin, select);
+        while(select.empty()) {
+            cout << "Input empty\n";
+            cout << "[a] Check balance   [b] Add balance\n";
+            cout << "[c] Play            [d] Buy\n";
+            cout << "[e] Logout" << endl;
+            getline(cin, select);
+        }
+        switch (select.at(0)) {
             case 'a':
-                cout << "=========================================\n";
-                cout << "|Your Current Account Balance is " << AccountBal[user] << "php|" << endl;
-                cout << "=========================================\n\n";
+                cout << "==============================================================\n";
+                cout << "Your Current Account Balance is " << AccountBal[user] << " php\n";
+                cout << "==============================================================\n\n";
                 break;
-            case 'b':
+
+            case 'b': {
                 cout << "How much would you like to add? \nEnter Amount in php: ";
                 cin >> UserBalance;
                 if (cin.fail()) {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << "Invalid input.\n";
+                    cin.clear();  // Clear error state
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');  // This clears the invalid input
+                    cout << "Invalid input. Returning to menu.\nEnter any key";
                 } else {
                     AccountBal[user] += UserBalance;
                     cout << "Successfully Added!\n";
                 }
+
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');  // This clears the leftover input
                 break;
+            }
+
             case 'c':
                 play(user);
                 break;
+
             case 'd':
                 store(user);
                 break;
+
             case 'e':
                 cout << "Logging you out...\n\n";
                 break;
+
             default:
-                cout << "Please select only one of the following." << endl;
-        }}while(select.at(0) != 'e');
+                cout << "Please select only one of the following.\n";
+        }
+    } while (select.at(0) != 'e');  // Loop until 'e' is selected
 }
 
 void login(int i){
     do{
         cout << "Enter your password: ";
-        cin >> password;
+        getline(cin, password);
+        while(password.empty()) {
+            cout << "Input empty\n";
+            cout << "Enter your password: ";
+            getline(cin, password);
+        }
         if(password == AccountPass[i]){
             cout << endl;
             cout << "Login Successful\n\n";
@@ -255,9 +311,19 @@ void login(int i){
 void CreateAcc(){
 
     cout << "Account Name: ";
-    cin >> name;
+    getline(cin, name);
+    while(name.empty()) {           //ask for input again if no input entered
+        cout << "Input empty\n";
+        cout << "Account Name: ";
+        getline(cin, name);
+    }
     cout << "Create Password: ";
-    cin >> password;
+    getline(cin, password);
+    while(password.empty()) {
+        cout << "Input empty\n";
+        cout << "Create Password: ";
+        getline(cin, password);
+    }
     for(int i = 0; i < maxacc; i++){ //for-loop to go through all of the index in the name array variable
         if(name == AccountName[i]){     //if name matched with existing name in the array, go back to main menu.
             cout << "Account name already exists.\n\n";
@@ -286,7 +352,12 @@ void SearchAcc(string Sname){ //function receives the input of the user which is
         cout << "Would you like to Login? (y/n): "; //the purpose of nTemp is to check if there are results found. If none, go back to main menu.
         string YoN;
             do{
-            cin >> YoN;
+            getline(cin, YoN);
+            while(YoN.empty()) {
+                cout << "Input empty\n";
+                cout << "Would you like to Login? (y/n): ";
+                getline(cin, YoN);
+            }
             for(int j = 0; j < maxacc; j++){    //another for loop to check which index the name that matched with Sname is in
                 if(Sname == AccountName[j]){
                     if(YoN.at(0) == 'y'){
@@ -308,11 +379,22 @@ void DeleteAcc(int acc){
     string auth;
 
     cout << "Enter password: ";
-    cin >> password;
+    getline(cin, password);
+    while(password.empty()) {
+        cout << "Input empty\n";
+        cout << "Enter password: ";
+        getline(cin, password);
+    }
+
     if(password == AccountPass[acc]){ //prompt for password and if password is correct, proceed to confirmation/authentication
         do{
         cout << "\nAre you sure you want to delete " << AccountName[acc] << "?\nAccount Balance: " << AccountBal[acc] << "\ny/n? " << endl;
-        cin >> auth;
+        getline(cin, auth);
+        while(auth.empty()) {
+            cout << "Input empty\n";
+            cout << "\nAre you sure you want to delete " << AccountName[acc] << "?\nAccount Balance: " << AccountBal[acc] << "\ny/n? " << endl;
+            getline(cin, auth);
+        }
         switch(auth.at(0)){
             case 'y':
                 AccountName[acc] = "\0";
@@ -328,6 +410,9 @@ void DeleteAcc(int acc){
             }
         }while(auth.at(0) != 'y' && auth.at(0) != 'n');
         }
+    else{
+        cout << "\nInvalid Password!\n";
+    }
 }
 
 int main(){
@@ -340,11 +425,25 @@ int main(){
     cout << "[3] Delete an Account" << endl;
     cout << "[4] Display Accounts" << endl;
     cout << "[5] Cancel operations" << endl;
-    cin >> option;
+    getline(cin, option);
+    while(option.empty()) {
+        cout << "Input empty\n";
+        cout << "[1] Search an Account" << endl;
+        cout << "[2] Create an Account" << endl;
+        cout << "[3] Delete an Account" << endl;
+        cout << "[4] Display Accounts" << endl;
+        cout << "[5] Cancel operations" << endl;
+        getline(cin, option);
+    }
     switch(option.at(0)){
         case '1':
             cout << "Account Name: ";
-            cin >> name;
+            getline(cin, name);
+            while(name.empty()) {
+                cout << "Input empty\n";
+                cout << "Account Name: ";
+                getline(cin, name);
+            }
             SearchAcc(name); //prompt for name and call the function to search while passing the input of the user to the function
             break;
         case '2':
@@ -352,12 +451,18 @@ int main(){
             break;
         case '3':
             cout << "Account Name: ";
-            cin >> name;
+            getline(cin, name);
+            while(name.empty()) {
+                cout << "Input empty\n";
+                cout << "Account Name: ";
+                getline(cin, name);
+            }
             for(int i = 0; i < maxacc; i++){
                 if(name == AccountName[i]){
                     DeleteAcc(i);
                     break;
-                }}
+                }
+                }
             break;
         case '4':
             cout << "|No.|    |Name|\n";
@@ -372,10 +477,8 @@ int main(){
         case '5':
             break;
         default:
+            cout << "\nNo valid input read.\n";
             break;
     }}while(option.at(0) != '5');   //"input.at(0)" or reading the string input's first character. I did this for all of inputs to ensure only one character is read.
-
     cout << "Bye!";
-
 }
-
